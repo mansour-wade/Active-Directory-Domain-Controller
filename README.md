@@ -2,9 +2,8 @@
 
 Windows Server 2022 promoted to a Domain Controller 
 with DNS, RDS Web Access portal, and LDAP integration. 
-Built as part of a connected hybrid enterprise lab 
-running on bare metal Rocky Linux — not a tutorial 
-follow-along.
+Part of a connected hybrid enterprise lab running on 
+bare metal Rocky Linux.
 
 ## Network Topology
 
