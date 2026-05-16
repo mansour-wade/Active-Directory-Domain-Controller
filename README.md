@@ -10,12 +10,12 @@ follow-along.
 
 ![Topology](screenshots/project2-active-directory-topology.png)
 
-## Status: 🔧 In Progress
+## Status: In Progress
 
 Full README with build steps, real issues, and 
 lessons learned coming when the project is complete.
 
 ## Lab Series
 
-- ✅ [Project 1 — Linux Enterprise Gateway](https://github.com/mansour-wade/Linux-Enterprise-Gateway)
-- 🔧 Project 2 — Active Directory DC (you are here)
+- [Project 1 — Linux Enterprise Gateway](https://github.com/mansour-wade/Linux-Enterprise-Gateway) — Complete
+- Project 2 — Active Directory DC — In Progress
