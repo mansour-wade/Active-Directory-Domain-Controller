@@ -16,10 +16,10 @@ learned coming when the project is complete.
 
 Ubuntu gateway now has a dedicated server subnet with 
 inter-subnet routing configured. Windows Server 2022 
-is deployed at 10.0.3.10 and renamed DC01. First real 
+is deployed at 10.0.3.10 and renamed DC01. The first real 
 issue hit was the VM kept booting back into the 
-installer after reboot. Turns out the ISO was still 
-mounted in VirtualBox. Ejected it and the issue was fixed.
+installer after reboot. It turns out the ISO was still 
+mounted in VirtualBox so I Ejected it and the issue was fixed.
 
 Next: installing the AD DS role and promoting DC01 to 
 a Domain Controller.
