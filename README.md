@@ -13,6 +13,10 @@ bare metal Rocky Linux.
 
 Full README with build steps, real issues, and 
 lessons learned coming when the project is complete.
+Ubuntu gateway updated with 
+third adapter (servernet 10.0.3.0/24), iptables 
+inter-subnet rules configured, and tcpdump baseline 
+verified. Next: deploying Windows Server 2022 VM.
 
 ## Lab Series
 
