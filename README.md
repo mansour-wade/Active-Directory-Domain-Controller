@@ -11,13 +11,18 @@ bare metal Rocky Linux.
 
 ## Status: In Progress
 
-Full README with build steps, real issues, and 
-lessons learned coming when the project is complete.
+Full README with build steps, real issues, and lessons 
+learned coming when the project is complete.
 
-Ubuntu gateway updated with 
-third adapter (servernet 10.0.3.0/24), iptables 
-inter-subnet rules configured, and tcpdump baseline 
-verified. Next: deploying Windows Server 2022 VM.
+Ubuntu gateway now has a dedicated server subnet with 
+inter-subnet routing configured. Windows Server 2022 
+is deployed at 10.0.3.10 and renamed DC01. First real 
+issue hit was the VM kept booting back into the 
+installer after reboot. Turns out the ISO was still 
+mounted in VirtualBox. Ejected it and the issue was fixed.
+
+Next: installing the AD DS role and promoting DC01 to 
+a Domain Controller.
 
 ## Lab Series
 
