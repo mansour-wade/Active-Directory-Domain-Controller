@@ -20,8 +20,7 @@ is deployed at 10.0.3.10 and renamed DC01. Two real
 issues hit so far. First, the VM kept booting back 
 into the installer after reboot. It turns out the ISO 
 was still mounted in VirtualBox so I ejected it and 
-the issue was fixed. 
-Second, inter-subnet routing 
+the issue was fixed. Second, inter-subnet routing 
 broke after restoring the Ubuntu gateway from a 
 snapshot which reset IP forwarding to 0 at runtime. I ran 
 sysctl -p to reload the settings and routing came 
