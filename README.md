@@ -40,8 +40,6 @@ in /etc/sysctl.d/ to fix it permanently.
 packets too so I added --state NEW to only block 
 outbound connections originating from the DC.
 
-Next: Windows 11 VM deployment and RDS Web Access portal.
-
 ## Lab Series
 
 - [Project 1 — Linux Enterprise Gateway](https://github.com/mansour-wade/Linux-Enterprise-Gateway) — Complete
