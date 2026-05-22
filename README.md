@@ -7,7 +7,7 @@ bare metal Rocky Linux.
 
 ## Network Topology
 
-![Topology](screenshots/project2-active-directory-topology.png)
+![Topology](screenshots/project2-active-directory-topology1.png)
 
 ## Status: In Progress
 
