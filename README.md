@@ -68,7 +68,7 @@ The `configs/` folder contains the actual configuration files from this project.
 
 ## Network Topology
 
-![Network Topology](screenshots/project2-active-directory-topology.png)
+![Network Topology](screenshots/project2-active-directory-topology1.png)
 
 ---
 
