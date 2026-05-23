@@ -304,15 +304,14 @@ On Ubuntu Server, always set persistent kernel parameters in `/etc/sysctl.d/` an
 
 **Cause:** The initial DROP rule had no state matching, so it dropped all ICMP packets transiting from `enp0s9` to `enp0s8`, including reply packets from connections that clients had initiated. The `RELATED,ESTABLISHED` ACCEPT rule at a lower position in the chain never got reached because the DROP fired first on everything.
 
-**Fix:** I added `--state NEW` to the DROP rule so it only catches new ICMP connections initiated from DC01's side:
+**Fix:** I removed the original stateless DROP rule and restructured the FORWARD chain so the DROP at position 4 is followed immediately by the `RELATED,ESTABLISHED` ACCEPT rule at position 5. This achieves the correct result through rule ordering. Established return traffic from pings initiated by clients hits the ACCEPT rule at position 5 before the DROP can apply to it. Only new connections originating from DC01 are dropped.
 
 ```bash
-sudo iptables -I FORWARD 4 -i enp0s9 -o enp0s8 -p icmp --state NEW -j DROP
+sudo iptables -I FORWARD 4 -i enp0s9 -o enp0s8 -p icmp -j DROP
+sudo netfilter-persistent save
 ```
 
-With stateful matching, client-initiated pings to DC01 still work because the reply packets are `ESTABLISHED` traffic and hit the ACCEPT rule before the DROP. Only new connections originating from DC01 are dropped.
-
-Always use stateful matching on DROP rules. A stateless DROP on a forwarding chain silently breaks legitimate return traffic and it is very hard to diagnose without tcpdump.
+A stateless DROP on a forwarding chain silently breaks legitimate return traffic and it is very hard to diagnose without tcpdump. Rule ordering is what controls which traffic gets through when state matching is not in play.
 
 ![iptables ICMP DROP rule added](screenshots/iptables-icmp-drop-rule-added.png)
 ![DC01 ping Rocky blocked](screenshots/dc01-ping-rocky-blocked.png)
