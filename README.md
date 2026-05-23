@@ -63,6 +63,7 @@ The `configs/` folder contains the actual configuration files from this project.
 | [rules.v4](configs/rules.v4) | `/etc/iptables/rules.v4` | Full ruleset including client NAT, inter-subnet stateful rules, and ICMP DROP |
 | [99-gateway-routing-fix.conf](configs/99-gateway-routing-fix.conf) | `/etc/sysctl.d/99-gateway-routing-fix.conf` | Persistent ip_forward fix that survives reboot and overrides cloud-init |
 | [project2-baseline.pcap](configs/project2-baseline.pcap) | captured on enp0s8 | Baseline ICMP capture before DC deployment, open in Wireshark |
+| [DC01-promote-ADDS-config.ps1](configs/DC01-promote-ADDS-config.ps1) | `C:\Users\Administrator\Desktop\` | PowerShell script exported from AD DS Configuration Wizard |
 
 ---
 
