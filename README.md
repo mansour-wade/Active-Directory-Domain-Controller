@@ -1,6 +1,6 @@
 # Active Directory Domain Controller
 
-Windows Server 2022 Domain Controller deployed on an isolated server subnet, integrated with the Ubuntu gateway built in Project 1. It handles authentication, DNS resolution, and OU-based identity management for a multi-client hybrid lab running Rocky Linux, Fedora, and Windows 11.
+Windows Server 2022 Domain Controller deployed on an isolated server subnet, integrated with the [Ubuntu gateway built in Project 1](https://github.com/mansour-wade/Linux-Enterprise-Gateway). It handles authentication, DNS resolution, and OU-based identity management for a multi-client hybrid lab running Rocky Linux, Fedora, and Windows 11.
 
 ---
 
@@ -32,7 +32,7 @@ Windows Server 2022 Domain Controller deployed on an isolated server subnet, int
 
 ## What I Built
 
-I extended the Ubuntu gateway from Project 1 into a full domain environment. The gateway already had two interfaces. I added a third one, `enp0s9`, which creates a dedicated server subnet called `servernet` at `10.0.3.0/24`, isolated from the client subnet `labnet` at `10.0.1.0/24`. DC01 runs on servernet and never touches labnet directly. All traffic between the two subnets routes through the gateway under stateful iptables rules.
+I extended the [Ubuntu gateway from Project 1](https://github.com/mansour-wade/Linux-Enterprise-Gateway) into a full domain environment. The gateway already had two interfaces. I added a third one, `enp0s9`, which creates a dedicated server subnet called `servernet` at `10.0.3.0/24`, isolated from the client subnet `labnet` at `10.0.1.0/24`. DC01 runs on servernet and never touches labnet directly. All traffic between the two subnets routes through the gateway under stateful iptables rules.
 
 This isn't a tutorial follow-along. I hit real issues: a VM that kept booting back into the installer ISO, a Windows Defender firewall rule silently blocking all ICMP, ip_forward resetting to 0 on every reboot because cloud-init overrides sysctl.conf, and an iptables DROP rule that broke traffic in both directions because I left out stateful matching. Each one is documented below with the cause and the fix.
 
