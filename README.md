@@ -215,10 +215,10 @@ The built-in Administrator account is not used for daily tasks. It exists as a b
 After verifying DNS and connectivity, I added a stateful ICMP DROP rule to block DC01 from initiating pings to clients. I inserted it at position 4 in the FORWARD chain:
 
 ```bash
-sudo iptables -I FORWARD 4 -i enp0s9 -o enp0s8 -p icmp --state NEW -j DROP
+sudo iptables -I FORWARD 4 -i enp0s9 -o enp0s8 -p icmp -j DROP
 ```
 
-Position matters here. The rule sits before the `RELATED,ESTABLISHED` ACCEPT rule, but it uses `--state NEW` so it only drops new ICMP connections. Reply packets from client-initiated pings still pass through because they are `ESTABLISHED` traffic and hit the ACCEPT rule first. Without `--state NEW`, the DROP catches everything including legitimate return traffic and breaks client-to-DC01 connectivity entirely. Issue 4 covers what happened when I got this wrong the first time.
+Position matters here. The rule sits at position 4, immediately before the RELATED,ESTABLISHED ACCEPT rule at position 5. Return traffic from pings initiated by clients hits the ACCEPT rule before the DROP can apply to it. Only new connections originating from DC01 are dropped. Issue 4 covers what happened when the rule order was wrong the first time.
 
 ```bash
 sudo netfilter-persistent save
@@ -323,7 +323,7 @@ A stateless DROP on a forwarding chain silently breaks legitimate return traffic
 
 DC01 sits on `10.0.3.0/24`, completely separate from the client subnet `10.0.1.0/24`. Clients reach the DC through the gateway and there is no direct Layer 2 path between them. This is a deliberate architecture decision and not just a network configuration.
 
-Clients can open connections to DC01, but DC01 cannot open new connections to clients. The `RELATED,ESTABLISHED` rule on the `enp0s9` to `enp0s8` direction only allows reply packets and not new sessions. DC01-initiated pings are blocked at the network layer with `--state NEW`, so client-to-DC01 pings still work normally.
+Clients can open connections to DC01, but DC01 cannot open new connections to clients. The `RELATED,ESTABLISHED` rule on the `enp0s9` to `enp0s8` direction only allows reply packets and not new sessions. DC01-initiated pings are blocked at the network layer through rule ordering, so pings from clients to DC01 still work normally.
 
 `mansour.admin` is the account used for all domain administration tasks. The built-in Administrator account exists only as a last-resort recovery account if the primary admin account is locked out or the domain has a critical failure. Privileged accounts live in a dedicated `Admin Accounts` OU separate from the standard `IT` OU, with accidental deletion protection enabled on both.
 
