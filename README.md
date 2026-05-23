@@ -287,7 +287,7 @@ After restoring any VM from a snapshot, always verify that runtime kernel settin
 net.ipv4.ip_forward=1
 ```
 
-Files in `/etc/sysctl.d/` load after cloud-init and take priority over `/etc/sysctl.conf`. The `99-` prefix ensures it loads last in the directory, after anything else that might interfere.
+Files in `/etc/sysctl.d/` are processed later in the systemd boot sequence, after `systemd-sysctl.service` finishes re-initializing network interfaces, making the setting persistent across reboots. The `99-` prefix ensures it loads last in the directory, after anything else that might interfere.
 
 After a full reboot, `cat /proc/sys/net/ipv4/ip_forward` returned 1 without any manual intervention. Routing was stable from that point forward.
 
