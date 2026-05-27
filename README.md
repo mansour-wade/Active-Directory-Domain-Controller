@@ -363,7 +363,7 @@ iptables rule order is everything. A DROP rule in the wrong position breaks legi
 
 `/etc/sysctl.conf` is not enough for persistent kernel parameters on Ubuntu Server. During boot, `systemd-sysctl.service` re-evaluates interface parameters as interfaces come online and resets runtime values before the system is fully up. That took a full reboot cycle to prove and `/etc/sysctl.d/` is the fix because it loads after the reset happens.
 
-DNS is the foundation of Active Directory. The static IP on DC01, the DNS server pointing to itself, the decision to enable the DNS role during promotion — none of that is optional. If DNS does not work, AD does not work and nothing in the domain resolves. The order of operations during promotion matters more than it looks.
+DNS is the foundation of Active Directory. The static IP on DC01, the DNS server pointing to itself, and the decision to enable the DNS role during promotion are all required. If any one of them is missing, the promotion fails or the domain does not resolve correctly.
 
 Snapshots capture runtime state and not just disk state. Restoring a snapshot that predates a `sysctl -p` call means `ip_forward` comes back as 0 even if the config file says 1. Always verify runtime values after any restore.
 
