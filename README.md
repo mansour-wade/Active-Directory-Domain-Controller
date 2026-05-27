@@ -218,7 +218,7 @@ After verifying DNS and connectivity, I added a stateful ICMP DROP rule to block
 sudo iptables -I FORWARD 4 -i enp0s9 -o enp0s8 -p icmp -j DROP
 ```
 
-Position matters here. The rule sits at position 4, immediately before the RELATED,ESTABLISHED ACCEPT rule at position 5. Return traffic from pings initiated by clients hits the ACCEPT rule before the DROP can apply to it. Only new connections originating from DC01 are dropped. Issue 4 covers what happened when the rule order was wrong the first time.
+Position matters here. The rule sits at position 4, immediately before the `RELATED,ESTABLISHED` ACCEPT rule at position 5. Return traffic from pings initiated by clients hits the ACCEPT rule before the DROP can apply to it. Only new connections originating from DC01 are dropped. Issue 4 covers what happened when the rule order was wrong the first time.
 
 ```bash
 sudo netfilter-persistent save
