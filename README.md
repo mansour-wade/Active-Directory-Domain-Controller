@@ -215,10 +215,10 @@ The built-in Administrator account is not used for daily tasks. It exists as a b
 After verifying DNS and connectivity, I added a stateful ICMP DROP rule to block DC01 from initiating pings to clients. I inserted it at position 4 in the FORWARD chain:
 
 ```bash
-sudo iptables -I FORWARD 4 -i enp0s9 -o enp0s8 -p icmp -j DROP
+sudo iptables -I FORWARD 4 -i enp0s9 -o enp0s8 -p icmp -m state --state NEW -j DROP
 ```
 
-Position matters here. The rule sits at position 4, immediately before the `RELATED,ESTABLISHED` ACCEPT rule at position 5. Return traffic from pings initiated by clients hits the ACCEPT rule before the DROP can apply to it. Only new connections originating from DC01 are dropped. Issue 4 covers what happened when the rule order was wrong the first time.
+Position matters here, but so does the state match. The rule sits at position 4, immediately before the RELATED,ESTABLISHED ACCEPT rule at position 5. Without the state match, a DROP at this position would catch all ICMP traffic in this direction, including reply packets to pings clients had already initiated. The --state NEW qualifier limits the DROP to new connections only, ones DC01 itself is initiating, so established reply traffic never matches this rule and falls through to the ACCEPT rule at position 5 instead. Issue 4 covers what happened when I left this qualifier out the first time.
 
 ```bash
 sudo netfilter-persistent save
@@ -302,16 +302,18 @@ On Ubuntu Server, always set persistent kernel parameters in `/etc/sysctl.d/` an
 
 **Problem:** After adding the iptables ICMP DROP rule to block DC01-initiated pings, clients lost the ability to ping DC01 entirely. The rule broke traffic in both directions.
 
-**Cause:** The initial DROP rule had no state matching, so it dropped all ICMP packets transiting from `enp0s9` to `enp0s8`, including reply packets from connections that clients had initiated. The `RELATED,ESTABLISHED` ACCEPT rule at a lower position in the chain never got reached because the DROP fired first on everything.
+**Cause:** The initial DROP rule had no state matching, so it dropped all ICMP packets transiting from enp0s9 to enp0s8, including reply packets from connections that clients had initiated. Position in the chain doesn't fix this on its own, a rule with no state qualifier matches unconditionally, so the RELATED,ESTABLISHED ACCEPT rule at position 5 never gets reached for ICMP traffic in this direction.
 
-**Fix:** I removed the original stateless DROP rule and restructured the FORWARD chain so the DROP at position 4 is followed immediately by the `RELATED,ESTABLISHED` ACCEPT rule at position 5. This achieves the correct result through rule ordering. Established return traffic from pings initiated by clients hits the ACCEPT rule at position 5 before the DROP can apply to it. Only new connections originating from DC01 are dropped.
+**Fix:** I added a state match to the DROP rule so it only catches new connections, not established reply traffic:
 
 ```bash
-sudo iptables -I FORWARD 4 -i enp0s9 -o enp0s8 -p icmp -j DROP
+sudo iptables -I FORWARD 4 -i enp0s9 -o enp0s8 -p icmp -m state --state NEW -j DROP
 sudo netfilter-persistent save
 ```
 
-A stateless DROP on a forwarding chain silently breaks legitimate return traffic and it is very hard to diagnose without tcpdump. Rule ordering is what controls which traffic gets through when state matching is not in play.
+With the state match in place, established return traffic from client-initiated pings matches the ACCEPT rule at position 5 instead, since it no longer matches the DROP rule at position 4. Only new connections originating from DC01 get dropped.
+
+A stateless DROP on a forwarding chain silently breaks legitimate return traffic, and it's very hard to diagnose without tcpdump. Position in the chain only matters in combination with a state match, position alone doesn't make a rule selective.
 
 ![iptables ICMP DROP rule added](screenshots/iptables-icmp-drop-rule-added.png)
 ![DC01 ping Rocky blocked](screenshots/dc01-ping-rocky-blocked.png)
@@ -323,7 +325,7 @@ A stateless DROP on a forwarding chain silently breaks legitimate return traffic
 
 DC01 sits on `10.0.3.0/24`, completely separate from the client subnet `10.0.1.0/24`. Clients reach the DC through the gateway and there is no direct Layer 2 path between them. This is a deliberate architecture decision and not just a network configuration.
 
-Clients can open connections to DC01, but DC01 cannot open new connections to clients. The `RELATED,ESTABLISHED` rule on the `enp0s9` to `enp0s8` direction only allows reply packets and not new sessions. DC01-initiated pings are blocked at the network layer through rule ordering, so pings from clients to DC01 still work normally.
+Clients can open connections to DC01, but DC01 cannot open new connections to clients. The `RELATED,ESTABLISHED` rule on the `enp0s9` to `enp0s8` direction only allows reply packets and not new sessions. DC01-initiated pings are blocked at the network layer using a stateful DROP rule, so pings from clients to DC01 still work normally.
 
 `mansour.admin` is the account used for all domain administration tasks. The built-in Administrator account exists only as a last-resort recovery account if the primary admin account is locked out or the domain has a critical failure. Privileged accounts live in a dedicated `Admin Accounts` OU separate from the standard `IT` OU, with accidental deletion protection enabled on both.
 
@@ -359,7 +361,7 @@ All tests were run after a full gateway reboot to confirm that iptables rules, i
 
 Network segmentation is architecture and not just configuration. Putting DC01 on its own subnet was a deliberate decision about what can talk to what and who initiates the connection. That decision lives in the iptables rules and not in a checkbox.
 
-iptables rule order is everything. A DROP rule in the wrong position breaks legitimate traffic silently and there is no error message. Packets just disappear. tcpdump is the only way to see what is actually happening at the forwarding layer.
+iptables rule order matters, but only in combination with state matching. A DROP rule without a state qualifier matches unconditionally regardless of position, and packets just disappear with no error message. tcpdump is the only way to see what is actually happening at the forwarding layer.
 
 `/etc/sysctl.conf` is not enough for persistent kernel parameters on Ubuntu Server. During boot, `systemd-sysctl.service` re-evaluates interface parameters as interfaces come online and resets runtime values before the system is fully up. That took a full reboot cycle to prove and `/etc/sysctl.d/` is the fix because it loads after the reset happens.
 
